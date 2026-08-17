@@ -13,16 +13,4 @@ Projeto frontend desenvolvido em Angular para gerenciamento de estoque de uma pe
 - Roteamento com rotas filhas
 - Interface com Material Design Bootstrap
 
-## Executando o projeto
-
-Instale as dependências:
-
-npm install
-
-Inicie a aplicação:
-
-npm start
-
-A aplicação estará disponível em:
-
 http://localhost:4200
