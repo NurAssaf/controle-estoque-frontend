@@ -16,6 +16,7 @@ import { ProdutoInput } from '../../models/produto.model';
 import { CategoriaService } from '../../services/categoria.service';
 import { FornecedorService } from '../../services/fornecedor.service';
 import { ProdutoService } from '../../services/produto.service';
+import { NotificacaoService } from '../../services/notificacao.service';
 
 function textoObrigatorio(control: AbstractControl): ValidationErrors | null {
   return typeof control.value === 'string' && control.value.trim()
@@ -62,7 +63,8 @@ export class ProdutoForm implements OnInit {
     private router: Router,
     private produtoService: ProdutoService,
     private categoriaService: CategoriaService,
-    private fornecedorService: FornecedorService
+    private fornecedorService: FornecedorService,
+    private notificacao: NotificacaoService
   ) {
     this.form = this.fb.group({
       nome: this.fb.nonNullable.control('', textoObrigatorio),
@@ -187,7 +189,14 @@ export class ProdutoForm implements OnInit {
       next: () => {
         this.salvando = false;
         this.form.enable();
-        this.router.navigate(['/sistema/produtos']);
+
+        this.notificacao.sucesso(
+          this.editando
+            ? 'Produto atualizado com sucesso.'
+            : 'Produto cadastrado com sucesso.'
+        );
+
+        void this.router.navigate(['/sistema/produtos']);
       },
       error: (resposta: HttpErrorResponse) => {
         this.erro = this.obterMensagemErro(
@@ -196,6 +205,8 @@ export class ProdutoForm implements OnInit {
         );
         this.salvando = false;
         this.form.enable();
+
+        this.notificacao.erro(this.erro);
       }
     });
   }
@@ -216,6 +227,8 @@ export class ProdutoForm implements OnInit {
       resposta,
       'Não foi possível carregar os dados do formulário.'
     );
+
+    this.notificacao.erro(this.erro);
   }
 
   private obterMensagemErro(
