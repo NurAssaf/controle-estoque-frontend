@@ -1,11 +1,119 @@
 <section aria-labelledby="page-title">
-  <div class="page-header"><div><p class="eyebrow">Catálogo e inventário</p><h1 id="page-title">Estoque de Perfumes</h1><p class="description">Consulte e mantenha os produtos disponíveis.</p></div><a class="btn btn-primary" routerLink="/sistema/produtos/novo">＋ Novo Produto</a></div>
-  @if (mensagem) { <div class="alert alert-success alert-dismissible fade show" role="alert">{{ mensagem }}<button type="button" class="btn-close" aria-label="Fechar" (click)="mensagem = ''"></button></div> }
-  <div class="card shadow-2 table-card"><div class="table-responsive"><table class="table align-middle mb-0">
-    <thead><tr><th>ID</th><th>Nome</th><th>Marca</th><th>Categoria</th><th>Preço</th><th>Em estoque</th><th class="text-end">Ações</th></tr></thead>
-    <tbody>
-      @for (produto of produtos; track produto.id) { <tr><td class="id">#{{ produto.id }}</td><td><strong>{{ produto.nome }}</strong></td><td>{{ produto.marca }}</td><td><span class="badge rounded-pill">{{ produto.categoria }}</span></td><td>{{ produto.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}</td><td><span class="stock" [class.low]="produto.quantidade < 10">{{ produto.quantidade }}</span></td><td class="actions"><a class="btn btn-outline-secondary btn-sm" [routerLink]="['/sistema/produtos/editar', produto.id]">Editar</a><button class="btn btn-outline-danger btn-sm" type="button" (click)="excluir(produto)">Excluir</button></td></tr> }
-      @empty { <tr><td colspan="7" class="empty">Nenhum produto cadastrado.</td></tr> }
-    </tbody>
-  </table></div></div>
+  <div class="page-header">
+    <div>
+      <p class="eyebrow">Catálogo e inventário</p>
+      <h1 id="page-title">Estoque de Perfumes</h1>
+      <p class="description">
+        Consulte e mantenha os produtos disponíveis.
+      </p>
+    </div>
+
+    <a class="btn btn-primary" routerLink="/sistema/produtos/novo">
+      ＋ Novo Produto
+    </a>
+  </div>
+
+  @if (mensagem) {
+    <div
+      class="alert alert-success alert-dismissible fade show"
+      role="status"
+    >
+      {{ mensagem }}
+      <button
+        type="button"
+        class="btn-close"
+        aria-label="Fechar mensagem"
+        (click)="mensagem = ''"
+      ></button>
+    </div>
+  }
+
+  @if (erro) {
+    <div class="alert alert-danger" role="alert">
+      <p class="mb-2">{{ erro }}</p>
+      <button
+        type="button"
+        class="btn btn-outline-danger btn-sm"
+        [disabled]="carregando || excluindoId !== null"
+        (click)="carregar()"
+      >
+        Recarregar lista
+      </button>
+    </div>
+  }
+
+  @if (carregando) {
+    <p role="status">Carregando produtos...</p>
+  } @else {
+    <div class="card shadow-2 table-card">
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th scope="col">ID</th>
+              <th scope="col">Nome</th>
+              <th scope="col">Marca</th>
+              <th scope="col">Categoria</th>
+              <th scope="col">Preço</th>
+              <th scope="col">Em estoque</th>
+              <th scope="col" class="text-end">Ações</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            @for (produto of produtos; track produto.id) {
+              <tr>
+                <td class="id">#{{ produto.id }}</td>
+                <td><strong>{{ produto.nome }}</strong></td>
+                <td>{{ produto.marca }}</td>
+
+                <td>
+                  <span class="badge rounded-pill">
+                    {{ produto.categoria?.nome ?? 'Sem categoria' }}
+                  </span>
+                </td>
+
+                <td>
+                  {{ produto.preco | currency:'BRL':'symbol':'1.2-2':'pt-BR' }}
+                </td>
+
+                <td>
+                  <span
+                    class="stock"
+                    [class.low]="produto.quantidadeEstoque < 10"
+                  >
+                    {{ produto.quantidadeEstoque }}
+                  </span>
+                </td>
+
+                <td class="actions">
+                  <a
+                    class="btn btn-outline-secondary btn-sm"
+                    [routerLink]="['/sistema/produtos/editar', produto.id]"
+                  >
+                    Editar
+                  </a>
+
+                  <button
+                    class="btn btn-outline-danger btn-sm"
+                    type="button"
+                    [disabled]="excluindoId !== null"
+                    (click)="excluir(produto)"
+                  >
+                    {{ excluindoId === produto.id ? 'Excluindo...' : 'Excluir' }}
+                  </button>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty">
+                  {{ erro ? 'Lista indisponível.' : 'Nenhum produto cadastrado.' }}
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
 </section>

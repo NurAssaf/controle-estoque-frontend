@@ -2,7 +2,8 @@
   "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
   "version": 1,
   "cli": {
-    "packageManager": "npm"
+    "packageManager": "npm",
+    "analytics": "2176f71c-503a-4ee9-bba3-010d39d7e722"
   },
   "newProjectRoot": "projects",
   "projects": {
@@ -14,9 +15,12 @@
       "prefix": "app",
       "architect": {
         "build": {
-          "builder": "@angular/build:application",
+          "builder": "@angular-devkit/build-angular:application",
           "options": {
+            "outputPath": "dist/controle-estoque-frontend",
+            "index": "src/index.html",
             "browser": "src/main.ts",
+            "polyfills": ["zone.js"],
             "tsConfig": "tsconfig.app.json",
             "assets": [
               {
@@ -25,10 +29,10 @@
               }
             ],
             "styles": [
-              "node_modules/mdb-ui-kit/css/mdb.min.css",
+              "node_modules/mdb-angular-ui-kit/assets/scss/mdb.scss",
               "src/styles.css"
             ],
-            "scripts": ["node_modules/mdb-ui-kit/js/mdb.umd.min.js"]
+            "scripts": []
           },
           "configurations": {
             "production": {
@@ -55,7 +59,7 @@
           "defaultConfiguration": "production"
         },
         "serve": {
-          "builder": "@angular/build:dev-server",
+          "builder": "@angular-devkit/build-angular:dev-server",
           "configurations": {
             "production": {
               "buildTarget": "controle-estoque-frontend:build:production"
@@ -67,7 +71,25 @@
           "defaultConfiguration": "development"
         },
         "test": {
-          "builder": "@angular/build:unit-test"
+          "builder": "@angular-devkit/build-angular:karma",
+          "options": {
+            "polyfills": [
+              "zone.js",
+              "zone.js/testing"
+            ],
+            "tsConfig": "tsconfig.spec.json",
+            "assets": [
+              {
+                "glob": "**/*",
+                "input": "public"
+              }
+            ],
+            "styles": [
+              "node_modules/mdb-angular-ui-kit/assets/scss/mdb.scss",
+              "src/styles.css"
+            ],
+            "scripts": []
+          }
         }
       }
     }
