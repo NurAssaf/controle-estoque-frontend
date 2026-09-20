@@ -1,14 +1,170 @@
 <section class="form-page" aria-labelledby="form-title">
-  <a class="back-link" routerLink="/sistema/produtos">← Voltar para o estoque</a>
-  @if (naoEncontrado) { <div class="alert alert-danger mt-4" role="alert"><h2 class="h5">Produto não encontrado</h2><p class="mb-0">O registro solicitado não existe ou já foi excluído.</p></div> }
-  @else {
-    <div class="heading"><p class="eyebrow">{{ editando ? 'Atualização de cadastro' : 'Novo cadastro' }}</p><h1 id="form-title">{{ editando ? 'Editar Produto' : 'Novo Produto' }}</h1><p>{{ editando ? 'Altere as informações do perfume selecionado.' : 'Preencha os dados para adicionar um perfume ao estoque.' }}</p></div>
-    <form class="card shadow-2" [formGroup]="form" (ngSubmit)="salvar()" novalidate><div class="card-body p-4 p-md-5"><div class="row g-4">
-      <div class="col-md-7"><label class="form-label" for="nome">Nome</label><input id="nome" class="form-control" formControlName="nome" [class.is-invalid]="invalido('nome')"><div class="invalid-feedback">Informe o nome.</div></div>
-      <div class="col-md-5"><label class="form-label" for="marca">Marca</label><input id="marca" class="form-control" formControlName="marca" [class.is-invalid]="invalido('marca')"><div class="invalid-feedback">Informe a marca.</div></div>
-      <div class="col-md-4"><label class="form-label" for="categoria">Categoria</label><select id="categoria" class="form-select" formControlName="categoria" [class.is-invalid]="invalido('categoria')"><option value="" disabled>Selecione</option><option>Feminino</option><option>Masculino</option><option>Unissex</option><option>Infantil</option></select><div class="invalid-feedback">Selecione a categoria.</div></div>
-      <div class="col-md-4"><label class="form-label" for="preco">Preço (R$)</label><input id="preco" type="number" min="0" step="0.01" class="form-control" formControlName="preco" [class.is-invalid]="invalido('preco')"><div class="invalid-feedback">Informe um preço igual ou maior que zero.</div></div>
-      <div class="col-md-4"><label class="form-label" for="quantidade">Quantidade</label><input id="quantidade" type="number" min="0" step="1" class="form-control" formControlName="quantidade" [class.is-invalid]="invalido('quantidade')"><div class="invalid-feedback">Informe uma quantidade igual ou maior que zero.</div></div>
-    </div><hr><div class="buttons"><a class="btn btn-light" routerLink="/sistema/produtos">Cancelar</a><button class="btn btn-primary" type="submit">{{ editando ? 'Salvar Alterações' : 'Cadastrar Produto' }}</button></div></div></form>
+  <a class="back-link" routerLink="/sistema/produtos">
+    ← Voltar para o estoque
+  </a>
+
+  <div class="heading">
+    <p class="eyebrow">
+      {{ editando ? 'Atualização de cadastro' : 'Novo cadastro' }}
+    </p>
+    <h1 id="form-title">
+      {{ editando ? 'Editar Produto' : 'Novo Produto' }}
+    </h1>
+    <p>
+      {{
+        editando
+          ? 'Altere as informações do perfume selecionado.'
+          : 'Preencha os dados para adicionar um perfume ao estoque.'
+      }}
+    </p>
+  </div>
+
+  @if (naoEncontrado) {
+    <div class="alert alert-danger" role="alert">
+      <h2 class="h5">Produto não encontrado</h2>
+      <p class="mb-0">O identificador informado é inválido.</p>
+    </div>
+  } @else {
+    @if (erro) {
+      <div class="alert alert-danger" role="alert">
+        <p class="mb-0">{{ erro }}</p>
+
+        @if (form.disabled && !carregando && !salvando) {
+          <button
+            type="button"
+            class="btn btn-outline-danger btn-sm mt-2"
+            (click)="carregarDados()"
+          >
+            Tentar novamente
+          </button>
+        }
+      </div>
+    }
+
+    @if (carregando) {
+      <p role="status">Carregando dados do formulário...</p>
+    }
+
+    <form
+      class="card shadow-2"
+      [formGroup]="form"
+      (ngSubmit)="salvar()"
+      novalidate
+    >
+      <div class="card-body p-4 p-md-5">
+        <div class="row g-4">
+          <div class="col-md-7">
+            <label class="form-label" for="nome">Nome</label>
+            <input
+              id="nome"
+              class="form-control"
+              formControlName="nome"
+              [class.is-invalid]="invalido('nome')"
+            >
+            <div class="invalid-feedback">Informe o nome.</div>
+          </div>
+
+          <div class="col-md-5">
+            <label class="form-label" for="marca">Marca</label>
+            <input
+              id="marca"
+              class="form-control"
+              formControlName="marca"
+              [class.is-invalid]="invalido('marca')"
+            >
+            <div class="invalid-feedback">Informe a marca.</div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="categoriaId">
+              Categoria (opcional)
+            </label>
+            <select
+              id="categoriaId"
+              class="form-select"
+              formControlName="categoriaId"
+            >
+              <option [ngValue]="null">Sem categoria</option>
+              @for (categoria of categorias; track categoria.id) {
+                <option [ngValue]="categoria.id">
+                  {{ categoria.nome }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="fornecedorId">
+              Fornecedor (opcional)
+            </label>
+            <select
+              id="fornecedorId"
+              class="form-select"
+              formControlName="fornecedorId"
+            >
+              <option [ngValue]="null">Sem fornecedor</option>
+              @for (fornecedor of fornecedores; track fornecedor.id) {
+                <option [ngValue]="fornecedor.id">
+                  {{ fornecedor.nome }} — {{ fornecedor.cnpj }}
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="preco">Preço (R$)</label>
+            <input
+              id="preco"
+              type="number"
+              step="0.01"
+              class="form-control"
+              formControlName="preco"
+              [class.is-invalid]="invalido('preco')"
+            >
+            <div class="invalid-feedback">
+              Informe um preço maior que zero.
+            </div>
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label" for="quantidadeEstoque">
+              Quantidade em estoque
+            </label>
+            <input
+              id="quantidadeEstoque"
+              type="number"
+              min="0"
+              max="2147483647"
+              step="1"
+              class="form-control"
+              formControlName="quantidadeEstoque"
+              [class.is-invalid]="invalido('quantidadeEstoque')"
+            >
+            <div class="invalid-feedback">
+              Informe um número inteiro entre 0 e 2147483647.
+            </div>
+          </div>
+        </div>
+
+        <hr>
+
+        <div class="buttons">
+          <a class="btn btn-light" routerLink="/sistema/produtos">
+            Cancelar
+          </a>
+          <button
+            class="btn btn-primary"
+            type="submit"
+            [disabled]="carregando || salvando || form.disabled"
+          >
+            {{
+              salvando
+                ? 'Salvando...'
+                : (editando ? 'Salvar Alterações' : 'Cadastrar Produto')
+            }}
+          </button>
+        </div>
+      </div>
+    </form>
   }
 </section>
